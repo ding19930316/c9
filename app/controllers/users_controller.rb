@@ -1,5 +1,5 @@
 class UsersController < ApplicationController
-    before_action :logged_in_user, only: [:index,:edit, :update]
+    before_action :logged_in_user, only: [:index,:edit, :update,:following,:followers]
     before_action :correct_user, only: [:edit, :update]
     before_action :admin_user, only: :destroy
     def index
@@ -7,10 +7,23 @@ class UsersController < ApplicationController
     end
     def show
       @user = User.find(params[:id])
+      @microposts = @user.microposts.paginate(page: params[:page])
       #debugger
     end
     def new
       @user = User.new
+    end
+    def following
+    @title = "Following"
+    @user = User.find(params[:id])
+    @users = @user.following.paginate(page: params[:page])
+    render 'show_follow'
+    end
+    def followers
+    @title = "Followers"
+    @user = User.find(params[:id])
+    @users = @user.followers.paginate(page: params[:page])
+    render 'show_follow'
     end
     def create
       @user = User.new(user_params) # 不是最终的实现方式
@@ -45,13 +58,13 @@ class UsersController < ApplicationController
     :password_confirmation)
     end
     # 确保用户已登录
-    def logged_in_user
-    unless logged_in?
-    store_location
-    flash[:danger] = "Please log in."
-    redirect_to login_url
-    end
-    end
+    #def logged_in_user
+    #unless logged_in?
+    #store_location
+    #flash[:danger] = "Please log in."
+    #redirect_to login_url
+    #end
+    #end
     def correct_user
     @user = User.find(params[:id])
     redirect_to(root_url) unless @user == current_user
